@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import authRouter from "./routes/auth"
 dotenv.config();
 
 const PORT = process.env.PORT;
@@ -19,6 +20,8 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"]
   })
 )
+
+app.use("/api/v1/auth", authRouter);
 
 mongoose
   .connect(MONGO_URI)
