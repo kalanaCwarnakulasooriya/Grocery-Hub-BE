@@ -7,7 +7,6 @@ const JWT_SECRET = process.env.JWT_SECRET as string
 
 export interface AUthRequest extends Request {
   user?: any
-  seller?: any
 }
 
 export const authenticate = (
@@ -20,12 +19,14 @@ export const authenticate = (
     return res.status(401).json({ message: "No token provided" })
   }
 
-  const token = authHeader.split(" ")[1] // ["Bearer", "dgcfhvgjygukhiluytkuy"]
+  const token = authHeader.split(" ")[1]
 
   try {
-    const payload = jwt.verify(token, JWT_SECRET)
-    req.user = payload
-    req.seller = payload
+    const payload = jwt.verify(token, JWT_SECRET) as any
+    req.user = {
+      _id: payload.sub,
+      roles: payload.roles,
+    };
     next()
   } catch (err) {
     console.error(err)
