@@ -23,10 +23,7 @@ export const authenticate = (
 
   try {
     const payload = jwt.verify(token, JWT_SECRET) as any
-    req.user = {
-      _id: payload.sub,
-      roles: payload.roles,
-    };
+    req.user = payload
     next()
   } catch (err) {
     console.error(err)

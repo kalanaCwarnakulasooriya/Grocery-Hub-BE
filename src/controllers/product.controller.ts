@@ -33,8 +33,15 @@ export const addProduct = async (req: AUthRequest, res: Response) => {
       category,
       inStock,
       image: imageURL,
-      seller : req.user._id
+      seller : req.user.sub
     })
+
+    const product = await Product.findOne({ name })
+    if (product) {
+      return res.status(400).json({
+        message: "Product already exist",
+      })
+    }
 
     await newProduct.save()
     
@@ -55,47 +62,30 @@ export const addProduct = async (req: AUthRequest, res: Response) => {
   }
 }
 
-export const productList = async (req: any, res: any) => {
+export const getAllProduct = async (req: AUthRequest, res: Response) => {
   try {
+    const page = parseInt(req.query.page as string) | 1
+    const limit = parseInt(req.query.limit as string) | 10
+    const skip = (page - 1) * limit
     const products = await Product.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+
+    const total = await Product.countDocuments()
+
     res.status(200).json({
-      message: "Product list",
-      data: products
+      message: "Product Fetched Successfully",
+      data: products,
+      totalPages: Math.ceil(total / limit),
+      totalCount: total,
+      page
     })
   } catch (error) {
     console.error(error)
     res.status(500).json({
-      message: "Internal Server Error",
+      message: "Failed to fetch product",
     })
   }
 }
 
-export const productById = async (req: any, res: any) => {
-  try {
-    const product = await Product.findById(req.params.id)
-    res.status(200).json({
-      message: "Product list",
-      data: product
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({
-      message: "Internal Server Error",
-    })
-  }
-}
-
-export const changeStock = async (req: any, res: any) => {
-  try {
-    const product = await Product.findById(req.params.id)
-    res.status(200).json({
-      message: "Product list",
-      data: product
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({
-      message: "Internal Server Error",
-    })
-  }
-}
