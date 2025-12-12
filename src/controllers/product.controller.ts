@@ -111,3 +111,52 @@ export const getProductById = async (req: AUthRequest, res: Response) => {
     })
   }
 }
+
+export const updateProduct = async (req: AUthRequest, res: Response) => {
+  try {
+    const productId = req.params.id as string | 1
+    const { name, description, price, offerPrice, category, inStock } = req.body
+
+    let imageURL = ""
+
+    if (req.file) {
+      const result: any = await new Promise((resole, reject) => {
+        const upload_stream = cloudinary.uploader.upload_stream(
+          { folder: "products" },
+          (error, result) => {
+            if (error) {
+              return reject(error)
+            }
+            resole(result) // success return
+          }
+        )
+        upload_stream.end(req.file?.buffer)
+      })
+      imageURL = result.secure_url
+    }
+
+    const updateProduct = await Product.findByIdAndUpdate(
+      productId,
+      {
+        name,
+        description,
+        price,
+        offerPrice,
+        category,
+        inStock,
+        image: imageURL,
+      },
+      { new: false }
+    )
+
+    res.status(200).json({
+      message: "Product updated successfully",
+      data: updateProduct
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({
+      message: "Failed to update product",
+    })
+  }
+}
